@@ -21,40 +21,60 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
         // cannot create a generic array object, so has to be cast
         // from an Object back into the generic in order to compile
         this.log = (T[])new Object[4];
+        size = 4;
+        this.name = name;
     }
 
     // Returns the name of this StringLog.
     public String getName()
     {
-        return "";
+        return name;
     }
 
     // Returns the logical size of this StringLog.
     public int size()
     {
-        return -1;
+        return size;
     }
     
     // Returns true if this list contains no elements.
     public boolean isEmpty()
     {
-        return false;
+        return size == 0;
     }
     
     // Returns true if this list is completely full.
     public boolean isFull()
     {
-        return false;
+        return size == log.length;
     }
 
     // Appends the specified element to the end of this list.
     public void add(T element)
     {
+        if (!isFull()) {
+            log[size] = element;
+            size++;
+        } else {
+            T[] hold = (T[]) new Object[size * 2];
+
+            for (int i = 0; i < size; i++) {
+                hold[i] = log[i];
+            } 
+
+            log = hold;
+            log[size] = element;
+            size++;
+        }
     }
   
     // Returns the element at the specified position in this list.
     public T get(int index)
     {   
+        try {
+            return log[index];
+        } catch (ArrayIndexOutOfBoundsException e) {
+        }
         return null;
     }
     
@@ -62,13 +82,21 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
     // in this list, or -1 if this list does not contain the element.
     public int indexOf(T element)
     {
+        for (int i = 0; i < size; i++)
+        {
+            if (log[i].equals(element))
+            {
+                return i;
+            }
+        }
+        
         return -1;
     }
     
     // Returns true if this list contains the specified element.
     public boolean contains(T element)
     {
-        return false;
+        return indexOf(element) != -1;
     }
     
     // Returns a formatted string representation of this StringLog.
@@ -86,12 +114,29 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
     // with the specified element.  Returns what was at that location
     public T set(int index, T element)
     {
-        return null;
+        T removed = log[index];
+        log[index] = element;
+        return removed;
     }
     
     // Inserts the specified element at the specified position in this list.
     public void add(int index, T element)
     {
+        if (isFull()) {
+            T[] hold = (T[]) new Object[size * 2];
+            for (int i = 0; i < size; i++) {
+                hold[i] = log[i];
+            }
+            log = hold;
+        }
+
+        T hold = log[index];
+        for (int i = index; i < size; i++) {
+            T temp = log[i+1];
+            log[i+1] = hold;
+            hold = temp;
+        }
+        log[index] = element;
     }
     
     // Removes the element at the specified position in this list, and
