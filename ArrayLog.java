@@ -21,7 +21,7 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
         // cannot create a generic array object, so has to be cast
         // from an Object back into the generic in order to compile
         this.log = (T[])new Object[4];
-        size = 4;
+        size = 0;
         this.name = name;
     }
 
@@ -122,21 +122,27 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
     // Inserts the specified element at the specified position in this list.
     public void add(int index, T element)
     {
-        if (isFull()) {
-            T[] hold = (T[]) new Object[size * 2];
-            for (int i = 0; i < size; i++) {
-                hold[i] = log[i];
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
+        else {
+            if (isFull()) {
+                T[] hold = (T[]) new Object[size * 2];
+                for (int i = 0; i < size; i++) {
+                    hold[i] = log[i];
+                }
+                log = hold;
             }
-            log = hold;
-        }
 
-        T hold = log[index];
-        for (int i = index; i < size; i++) {
-            T temp = log[i+1];
-            log[i+1] = hold;
-            hold = temp;
+            T hold = log[index];
+            for (int i = index; i < size; i++) {
+                T temp = log[i+1];
+                log[i+1] = hold;
+                hold = temp;
+            }
+            log[index] = element;
+            size++;
         }
-        log[index] = element;
     }
     
     // Removes the element at the specified position in this list, and
@@ -144,7 +150,24 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
     // are set to null.
     public T remove(int index)
     {
-        return null;
+        T removed = log[index];
+        log[index] = null;
+
+        for (int i = index; i < size -1; i++) {
+            log[i] = log[i+1];
+            log[i+1] = null;
+        }
+
+        if (size <= log.length / 4) {
+            T[] hold = (T[]) new Object[log.length / 2];
+            for (int i = 0; i < size; i++) {
+                hold[i] = log[i];
+            }
+            log = hold;
+        }
+        size--;
+
+        return removed;
     }
     
     // Removes the first occurance of the specified element from this
@@ -152,11 +175,18 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
     // removed), false otherwise.
     public boolean remove(T element)
     {
+        if (contains(element)) {
+            remove(indexOf(element));
+            return true;
+        }
         return false;
     }
     
     // Removes all of the elements from this list.
-    public void clear()
-    {
+    public void clear() {
+        for (int i = 0; i < size; i++) {
+            log[i] = null;
+        }
+        size = 0;
     }
 }
