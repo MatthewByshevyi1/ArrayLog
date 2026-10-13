@@ -134,13 +134,11 @@ public class ArrayLog<T> implements EnhancedLogInterface<T>
                 log = hold;
             }
 
-            T hold = log[index];
-            for (int i = index; i < size; i++) {
-                T temp = log[i+1];
-                log[i+1] = hold;
-                hold = temp;
+            for (int i = size; i > index; i--) {
+                log[i] = log[i-1];
             }
             log[index] = element;
+
             size++;
         }
     }
