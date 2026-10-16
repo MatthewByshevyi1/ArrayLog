@@ -61,7 +61,7 @@ public class LinkedLog<T> implements EnhancedLogInterface<T>
     // returns the element at the specified position in this list
     public T get(int index)
     {
-        if (size <= index && index >= 0) {
+        if (index >= size || index < 0) {
             System.out.println("Index out of bounds.");
         } else {
             int current = 0;
@@ -71,7 +71,7 @@ public class LinkedLog<T> implements EnhancedLogInterface<T>
                     return currentNode.getInfo();
                 } else {
                     current++;
-                    currentNode = log.getLink();
+                    currentNode = currentNode.getLink();
                 }
             }
         }
@@ -122,8 +122,9 @@ public class LinkedLog<T> implements EnhancedLogInterface<T>
     // with the specified element
     public T set(int index, T element)
     {
-        if (index >= size && index >= 0) {
+        if (index >= size || index < 0) {
             System.out.println("Invalid index.");
+            return null;
         }
 
         LLNode<T> currentNode = log;
@@ -141,29 +142,78 @@ public class LinkedLog<T> implements EnhancedLogInterface<T>
     // inserts the specified element at the specified position in this list
     public void add(int index, T element)
     {
-        LLNode<T> previous = log;
-        LLNode<T> next = log;
+        LLNode<T> newNode = new LLNode<T>(element);
 
-        for (int i = 0; i < index; i++) {
-            if (i == index-1) {
-                next = next.getLink();
-            } else {
-                next = next.getLink();
-                previous = next.getLink();
-            }
+        if (index > size || index < 0) {
+            System.out.println("Invalid index.");
+            return;
         }
+        else if (index == 0) {
+            newNode.setLink(log);
+            log = newNode;
+        }
+        else {
+            LLNode<T> previous = log;
+
+            for (int i = 0; i < index-1; i++) {
+                previous = previous.getLink();
+            }
+
+            newNode.setLink(previous.getLink());
+            previous.setLink(newNode);
+        }
+        size++;
     }
     
     // removes the element at the specified position in this list
     public T remove(int index)
     {
-        return null;
+        if (index >= size || index < 0) {
+            System.out.println("Invalid index.");
+            return null;
+        }
+
+        if (index == 0) {
+            T retrn = log.getInfo();
+
+            log = log.getLink();
+            size--;
+
+            return retrn;
+        }
+
+        LLNode<T> previous = log;
+
+        for (int i = 0; i < index-1; i++) {
+            previous = previous.getLink();
+        }
+        
+        T retrn = previous.getLink().getInfo();
+        previous.setLink(previous.getLink().getLink());
+        
+        size--;
+
+        return retrn;
     }
     
     // removes the first occurance of the specified element from this
     // list, if it is present
     public boolean remove(T element)
     {
+        if (!contains(element)) {
+            return false;
+        }
+        
+        LLNode<T> current = log;
+
+        for (int i = 0; i < size; i++) {
+            if (current.getInfo().equals(element)) {
+                remove(i);
+                return true;
+            }
+            current = current.getLink();
+        }
+
         return false;
     }
         
